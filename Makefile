@@ -8,6 +8,7 @@ DOCKER_REPO   := cloudflare/
 GOFLOW_NAME    := goflow
 GOFLOW_VERSION := $(shell git describe --tags $(git rev-list --tags --max-count=1))
 VERSION_PKG   := $(shell echo $(GOFLOW_VERSION) | sed 's/^v//g')
+VERSION_PKG   := 1.0
 ARCH          := x86_64
 LICENSE       := BSD-3
 URL           := https://github.com/cloudflare/goflow
