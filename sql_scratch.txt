@@ -1,0 +1,73 @@
+CREATE TABLE sharded_sensor_values ON CLUSTER 'my_cluster' (
+    timestamp DateTime,
+    site_id UInt32,
+    event VARCHAR,
+    uuid UUID,
+    metric_value Int32
+)
+ENGINE = ReplicatedMergeTree('/clickhouse/tables/{shard}/sharded_sensor_values', '{replica}')
+ORDER BY (site_id, toStartOfDay(timestamp), event, uuid)
+SETTINGS index_granularity = 8192
+
+
+
+
+
+
+	CREATE TABLE IF NOT EXISTS %s.nflow ON CLUSTER %s(
+    
+	    TimeReceived UInt32,
+	    TimeFlowStart UInt32,
+	    TimeFlowEnd UInt32,
+	    Bytes UInt16,
+	    Etype UInt32,
+	    Packets UInt64,
+	    SrcAddr UInt32,
+	    DstAddr UInt32,
+	    SrcPort UInt32,
+	    DstPort UInt32,
+	    Proto UInt32,
+	    SrcMac UInt64,
+	    DstMac UInt64,
+	    SrcVlan UInt32,
+	    DstVlan UInt32,
+	    VlanId UInt32,
+	    FlowType UInt8,
+		SequenceNum UInt32,
+		SamplerAddress UInt32,
+		SamplingRate UInt64,
+		InIf UInt32,
+		OutIf UInt32
+	) ENGINE = ReplicatedMergeTree('/nflow/{uuid}/{shard}','{replica}') 
+	ORDER BY (TimeReceived, SrcAddr, SrcPort, DstAddr, DstPort)
+	PARTITION BY DstAddr
+	SAMPLE BY SrcAddr
+	
+
+
+
+CREATE TABLE distributed_nflow ON CLUSTER 'cluster_2S_1R' (
+	    TimeReceived UInt32,
+	    TimeFlowStart UInt32,
+	    TimeFlowEnd UInt32,
+	    Bytes UInt16,
+	    Etype UInt32,
+	    Packets UInt64,
+	    SrcAddr UInt32,
+	    DstAddr UInt32,
+	    SrcPort UInt32,
+	    DstPort UInt32,
+	    Proto UInt32,
+	    SrcMac UInt64,
+	    DstMac UInt64,
+	    SrcVlan UInt32,
+	    DstVlan UInt32,
+	    VlanId UInt32,
+	    FlowType UInt8,
+		SequenceNum UInt32,
+		SamplerAddress UInt32,
+		SamplingRate UInt64,
+		InIf UInt32,
+		OutIf UInt32
+)
+ENGINE = Distributed('cluster_2S_1R', 'netflow', 'nflow', intHash64(TimeReceived))

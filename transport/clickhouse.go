@@ -107,11 +107,11 @@ func StartClickHouseConnection(logger utils.Logger) (*ClickHouseState, error) {
 	    VlanId UInt32,
 	    FlowType UInt8,
 		SequenceNum UInt32,
-		SamplerAddress String,
+		SamplerAddress UInt32,
 		SamplingRate UInt64,
 		InIf UInt32,
 		OutIf UInt32
-	) ENGINE = ReplicatedMergeTree('/nflow','{replica}') 
+	) ENGINE = ReplicatedMergeTree('/nflow/{uuid}/{shard}','{replica}') 
 	ORDER BY (TimeReceived, SrcAddr, SrcPort, DstAddr, DstPort)
 	PARTITION BY DstAddr
 	SAMPLE BY SrcAddr
@@ -140,6 +140,7 @@ func ClickHouseInsert(fm *flowmessage.FlowMessage, stmt *sql.Stmt, wg *sync.Wait
 	// assume and encode as IPv4 (even if its v6)
 	srcAddr := ipv4BytesToUint32(fm.GetSrcAddr()[:4])
 	dstAddr := ipv4BytesToUint32(fm.GetDstAddr()[:4])
+	samplerAddr := ipv4BytesToUint32(fm.GetSamplerAddress()[:4])
 
 	count += 1
 	// fmt.Printf("stmt: %v\n", stmt)
@@ -162,7 +163,7 @@ func ClickHouseInsert(fm *flowmessage.FlowMessage, stmt *sql.Stmt, wg *sync.Wait
 		fm.GetVlanId(),
 		uint8(fm.GetType()),
 		fm.GetSequenceNum(),
-		fm.GetSamplerAddress(),
+		samplerAddr,
 		fm.GetSamplingRate(),
 		fm.GetInIf(),
 		fm.GetOutIf(),

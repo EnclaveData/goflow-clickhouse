@@ -8,7 +8,7 @@ DOCKER_REPO   := cloudflare/
 GOFLOW_NAME    := goflow
 GOFLOW_VERSION := $(shell git describe --tags $(git rev-list --tags --max-count=1))
 VERSION_PKG   := $(shell echo $(GOFLOW_VERSION) | sed 's/^v//g')
-VERSION_PKG   := 1.0
+VERSION_PKG   := 1.6
 ARCH          := x86_64
 LICENSE       := BSD-3
 URL           := https://github.com/cloudflare/goflow
@@ -55,7 +55,7 @@ clean:
 
 .PHONY: build-goflow
 build-goflow: prepare
-	go build -ldflags $(LDFLAGS) -o $(OUTPUT_GOFLOW) cmd/goflow/goflow.go
+	CGO_ENABLED=0 go build -ldflags $(LDFLAGS) -o $(OUTPUT_GOFLOW) cmd/goflow/goflow.go
 
 .PHONY: build-goflow-light
 build-goflow-light: prepare

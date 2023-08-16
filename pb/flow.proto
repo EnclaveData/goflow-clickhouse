@@ -1,6 +1,8 @@
 syntax = "proto3";
 package flowprotob;
 
+option go_package = "flowprotob";
+
 option java_package = "com.cloudflare.net.flowagg";
 option java_outer_classname = "FlowMessagePb";
 
